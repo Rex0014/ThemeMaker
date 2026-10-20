@@ -1,0 +1,27 @@
+/* Font Definition */
+
+@font-face {
+    font-family: 'MyFont';
+    src: url('Comfortaa-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MyFont';
+    src: url('Comfortaa-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'MyFont';
+    src: url('Comfortaa-Light.ttf');
+    font-weight: 300;
+}
+
+@font-face {
+    font-family: 'MyFont';
+    src: url('Comfortaa-SemiBold.ttf');
+    font-weight: 600;
+}

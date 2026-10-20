@@ -1,0 +1,123 @@
+/*=========================
+    Card
+===========================
+
+A bounded block of related content. Same knob discipline as `.box` in
+basic_elements.css: everything a modifier is expected to change is a
+`--card-*` custom property, so `.card.accent` only has to restate the two
+values that actually differ.
+
+    <div class="card">
+        <div class="card_title">Pérennité</div>
+        Aucun environnement d'exécution tiers à installer.
+    </div>
+
+Note the border. On a light theme a raised surface is lighter than the page; the
+ramp inversion makes it darker on a dark theme. The 2px border is what keeps the
+card legible as a card in both directions, so do not drop it. */
+
+.card {
+    --card-bg: var(--neutral-01);
+    --card-fg: var(--neutral-08);
+    --card-border: var(--neutral-04);
+    --card-radius: 16px;
+    --card-padding: 22px 26px;
+    --card-font-size: 27px;
+    --card-accent: var(--primary-07);
+
+    /* Block, not flex. A card's content is running text with inline emphasis in
+       it — <strong>, <span class="hl"> — and a flex container would promote
+       every one of those into a block-level flex item on its own line. The
+       title and label carry their own margin instead of relying on a gap. */
+    box-sizing: border-box;
+    display: block;
+
+    padding: var(--card-padding);
+    border: 2px solid var(--card-border);
+    border-radius: var(--card-radius);
+    background: var(--card-bg);
+    color: var(--card-fg);
+
+    font-size: var(--card-font-size);
+    line-height: 1.38;
+    text-align: left;
+}
+
+.card_title {
+    display: block;
+    margin-bottom: 10px;
+
+    font-weight: 700;
+    font-size: 1.06em;
+    line-height: 1.2;
+    color: var(--card-accent);
+}
+
+/* A short label above the title — a criterion name, a category. */
+.card_label {
+    display: block;
+    margin-bottom: 10px;
+
+    font-size: 19px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--neutral-06);
+}
+
+/* A list is the one child that legitimately follows running text in a card. */
+.card > .bullets,
+.card > .steps,
+.card > .plain { margin-top: 10px; }
+
+/* ── Modifiers ──────────────────────────────────────────────────────────── */
+
+/* The one card on the slide that carries the point. */
+.card.accent {
+    --card-border: var(--accent-07);
+    --card-accent: var(--accent-07);
+}
+
+/* The conclusion of a comparison: the option that was retained. */
+.card.chosen {
+    --card-border: var(--success-07);
+    --card-accent: var(--success-07);
+}
+
+/* Structure without weight — used when several cards would be too much ink. */
+.card.ghost {
+    --card-bg: transparent;
+    --card-border: var(--neutral-04);
+}
+
+/* Reversed, for the single card that must dominate the slide. */
+.card.solid {
+    --card-bg: var(--primary-08);
+    --card-fg: var(--primary-01);
+    --card-border: var(--primary-08);
+    --card-accent: var(--primary-02);
+}
+
+/* Left rule instead of a full box: a lighter container for a quote or an aside
+   that should not read as a separate object. */
+.card.rule {
+    --card-bg: transparent;
+    --card-padding: 4px 0 4px 26px;
+    border: 0;
+    border-left: 6px solid var(--card-accent);
+    border-radius: 0;
+}
+
+.card.compact { --card-padding: 14px 18px; --card-font-size: 24px; }
+
+/* ── Grid ───────────────────────────────────────────────────────────────── */
+
+.card_grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    align-items: stretch;
+}
+
+.card_grid.c2 { grid-template-columns: repeat(2, 1fr); }
+.card_grid.c4 { grid-template-columns: repeat(4, 1fr); }

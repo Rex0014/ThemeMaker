@@ -1,0 +1,20 @@
+/*=========================
+    Theme — CSS side
+===========================
+
+Nothing but the selection list. Each typeface owns its own file and declares
+itself under a ROLE name ('MyFont', 'HeavyFont'), never its own name — so
+swapping Comfortaa for something else is one line here plus a sibling folder,
+and no stylesheet that uses the font has to change.
+
+Colours work the same way but on the JS side: one file per colour under
+Palette/colours/, selected by the alias table in Palette/theme.js, which
+publishes them as --neutral-01 … --neutral-11 and --brand-01 … --brand-11.
+No colour is declared in CSS at all, and there is no light/dark mirror to keep.
+
+Paths are relative to this file. @import must stay above any rule. */
+
+@import url('font/MyFont/comfortaa/Comfortaa.css');
+@import url('font/HeavyFont/Anton/Anton.css');
+@import url('Palette/colours/Code.css');
+@import url('Palette/colours/Code2.css');

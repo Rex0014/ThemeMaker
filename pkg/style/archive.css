@@ -1,0 +1,193 @@
+/* Label filled with the scene photo, aligned so the glyphs read as a window cut
+   through to the image behind them. The element deliberately spans the entire
+   scene and paints the photo at the same size/position as .scene_img — that is
+   what makes the fill register with the background instead of being some
+   arbitrary crop. Set the photo per slide with --label-img. */
+.label_img {
+    /* border-box so padding used to place the text does not widen the box and
+       drag the background positioning area out of register with the scene */
+    box-sizing: border-box;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 2; /* explicitly above .glass_panel, so the fill is never blurred by it */
+
+    background-image: var(--slide-img);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: auto; /* native size — same as .scene_img renders at */
+
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+
+    /* No filter or text-shadow here on purpose. Either one forces the browser to
+       rasterize the label into a texture, which impress.js's canvas transform then
+       rescales — softening the glyph edges. Keep this element filter-free. */
+    text-shadow: none;
+}
+
+/* Frosted glass panel.
+   Deliberately NOT backdrop-filter: that forces the region into a composited
+   texture which impress.js's canvas transform then resamples, which softens any
+   sibling drawn near it — it was blurring the sharp .label_img fill. Instead the
+   panel carries its own blurred copy of the slide photo, laid out in scene
+   coordinates so it registers with the real background behind it.
+   Requires --slide-img on the step, and top:0 for the alignment to hold. */
+.glass_panel {
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    overflow: hidden; /* clip the full-scene copy down to the panel */
+}
+
+.glass_panel::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1920px;
+    height: 1080px;
+
+    background-image: var(--slide-img);
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: auto; /* native size — same as .scene_img renders at */
+
+    --panel-blur: 24px;
+    filter: blur(var(--panel-blur));
+}
+
+/* the tint, painted over the blurred copy — kept on its own layer so its edges
+   stay crisp instead of being feathered by the blur */
+.glass_panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: rgba(128, 128, 128, 0.6);
+}
+
+
+
+.pres_button {
+    display: inline-block;
+    padding: 16px;
+    border-radius: 10px;
+    background-color: var(--colorB);
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 600;
+    cursor: pointer;
+    position: absolute;
+    z-index: 20;
+}
+
+.pres_button:hover {
+    background-color: var(--accent);
+}
+
+.box_list {
+    width: max-content;
+    border-radius: 20px;
+    background-color: var(--colorB);
+    color: var(--colorA);
+    padding: 48px;
+    font-size: 32px;
+    opacity: 0;
+    transform: translateY(-80px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+
+    position: absolute;
+
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    justify-content: left;
+    text-align: left;
+}
+
+.box_transparent {
+    width: max-content;
+    border-radius: 20px;
+    background-color: transparent;
+    border: 2px solid var(--colorD);
+    color: var(--colorD);
+    padding: 48px;
+    font-size: 32px;
+    opacity: 1;
+    transform: translateY(-80px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+
+    position: absolute;
+
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    gap: 16px;
+}
+
+.mother-boxes-container {
+    position: absolute;
+    display: flex;
+    gap: 40px;
+    align-items: flex-start;
+}
+
+.mother-box {
+    border-radius: 20px;
+    border: 4px solid var(--colorA);
+    background-color: var(--colorB1);
+    padding: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 720px;
+}
+
+.mother-box .box {
+    background-color: var(--colorB);
+    color: var(--colorA);
+    opacity: 1;
+    transform: none;
+    margin: 0;
+    position: relative;
+    padding: 16px 24px;
+    font-size: 24px;
+    width: 90%;
+}
+
+/* On the dark theme the fill is the light colour, so the engraving has to lean
+   on the shade side — a white highlight that strong would flatten it.
+:root[data-theme="dark"] .title {
+    --title-shade: rgba(0, 0, 0, 0.45);
+    --title-light: rgba(255, 255, 255, 0.18);
+
+}
+
+/* Heavy display label. Anton is already ultra-bold by design, so the weight comes
+   from the face itself, not from font-weight (it has no bold face) and not from a
+   stroke. --label-weight is left at 0 and only exists if you want to push it even
+   fatter; a couple of px is plenty, past that the counters close up. */
+.label_xl {
+    font-family: 'MyDisplay', 'MyFont', Impact, sans-serif;
+    font-weight: normal;
+
+    --label-weight: 0px;
+    -webkit-text-stroke: var(--label-weight) currentColor;
+    paint-order: stroke fill;
+
+    font-size: 240px;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+}

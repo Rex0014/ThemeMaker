@@ -1,0 +1,163 @@
+/*=========================
+    Org chart
+===========================
+
+A chain of belonging, read top to bottom: group → division → unit → team → the
+speaker. Deliberately *not* a tree — a full org chart projected on a wall is
+unreadable, and the audience only ever needs the one branch that leads to the
+person talking. The siblings are named in the right-hand column instead, as
+plain text, which says "there are others" without drawing forty boxes.
+
+    <div class="org">
+        <div class="org_tier">                     ← always visible
+            <div class="org_rank">Groupe</div>
+            <div class="org_node">
+                <strong>INGELIANCE Technologies</strong>
+                <span class="org_meta">Siège à Mérignac</span>
+            </div>
+            <div class="org_side">une glose facultative</div>
+        </div>
+        <div class="org_tier substep hold keep"> … </div>
+        <div class="org_tier last substep hold keep"> … </div>
+    </div>
+
+Every tier below the first is meant to carry `substep hold keep`:
+
+    substep   the level appears when the speaker asks for it — the descent is
+              the point of the slide, and it has to happen in front of the room
+    hold      levels already shown keep their full weight; a chain of belonging
+              is only legible whole, so nothing recedes once it is on screen
+    keep      the tier reserves its height before it appears, so the chart does
+              not jump upwards as the chain grows
+
+The level being introduced is picked out on its own, by `substep-active`, which
+the plugin puts on the newest substep only — that is what replaces the dimming
+`hold` turns off.
+
+The connector is drawn by the node's own ::before, so a tier is one element and
+the line can never end up out of step with the box it points at. */
+
+.org {
+    /* Knobs. The rank column is sized to the longest label of the deck rather
+       than to its text, so every node in the chart starts at the same x. */
+    --org-rank-w: 200px;
+    --org-node-w: 880px;
+    --org-gap: 30px;
+    --org-accent: var(--accent-07);
+    --org-line: var(--neutral-05);
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.org_tier {
+    display: grid;
+    grid-template-columns: var(--org-rank-w) minmax(0, var(--org-node-w)) 1fr;
+    align-items: center;
+    gap: 28px;
+
+    /* The gap between two tiers belongs to the lower one: it is the room the
+       connector needs. Written as padding rather than as a flex gap so the
+       first tier is not indented by a line that does not exist. */
+    padding-top: var(--org-gap);
+}
+
+.org > .org_tier:first-child { padding-top: 0; }
+
+/* ── The rank ───────────────────────────────────────────────────────────────
+   What kind of thing the box is — "Division", "Pôle" — not its name. Set as a
+   label rather than inside the box: the audience reads the level once, then
+   only follows the names. */
+
+.org_rank {
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-align: right;
+    color: var(--neutral-06);
+}
+
+/* ── The node ──────────────────────────────────────────────────────────────*/
+
+.org_node {
+    position: relative;
+    box-sizing: border-box;
+
+    padding: 17px 30px;
+    border: 3px solid var(--neutral-04);
+    border-radius: 16px;
+    background: var(--neutral-02);
+    color: var(--neutral-09);
+
+    font-size: 34px;
+    line-height: 1.2;
+    transition: border-color 0.4s ease, background-color 0.4s ease;
+}
+
+.org_node strong { font-weight: 600; }
+
+.org_meta {
+    display: block;
+    margin-top: 5px;
+
+    font-size: 22px;
+    line-height: 1.25;
+    color: var(--neutral-07);
+}
+
+/* The connector: a stem rising out of the top of the box, exactly as tall as
+   the padding the tier reserved above it. */
+.org_node::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    width: 3px;
+    height: var(--org-gap);
+    background: var(--org-line);
+}
+
+.org > .org_tier:first-child .org_node::before { content: none; }
+
+/* ── The branch being introduced ────────────────────────────────────────────
+   `hold` keeps every revealed tier at full opacity, so the chart cannot fade
+   into illegibility as it grows. What marks the current level instead is the
+   accent — one box at a time, and it moves down the chain as the speaker does. */
+
+.org_tier.substep-active .org_node {
+    border-color: var(--org-accent);
+    background: var(--neutral-01);
+}
+
+/* ── The end of the chain ──────────────────────────────────────────────────
+   The last tier is the speaker's own post: it stays picked out after the
+   descent is over, because it is the one line the audience should leave with. */
+
+.org_tier.last .org_node {
+    border-color: var(--org-accent);
+    border-width: 4px;
+}
+
+/* ── Siblings ──────────────────────────────────────────────────────────────
+   The branches not taken, and any gloss on the level. Muted on purpose: it is
+   context, not content. */
+
+.org_side {
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--neutral-06);
+}
+
+/* ── Compact ───────────────────────────────────────────────────────────────
+   For a chart of six levels or more, which no longer fits the body band. */
+
+.org.compact {
+    --org-gap: 20px;
+}
+
+.org.compact .org_node { padding: 12px 24px; font-size: 29px; }
+.org.compact .org_meta { font-size: 20px; }

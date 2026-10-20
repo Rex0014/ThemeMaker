@@ -1,0 +1,599 @@
+/*=========================
+    Deck-local overrides
+===========================
+
+Everything generic lives under pkg/style/ — basic_elements.css for the base
+geometry, components.css for the slide elements. This file holds only what is
+true of *this* talk and of no other, and it should stay short. If a rule here
+starts looking useful to a second deck, it belongs in a component instead.
+
+Two shapes of rule are legitimate here:
+
+  1. Modifiers on a generic element, written as a second class on the same
+     element. basic_elements.css exposes the base `.box` knobs as --box-*, and
+     components.css does the same for every element it defines:
+
+         <div class="box date">25/08/2026</div>
+
+     Two classes on one element = specificity (0,2,0), which always beats the
+     bare `.box` at (0,1,0) — so order inside this file never bites you. Set
+     only the properties you want changed; the rest keep the base values.
+
+  2. A single-slide correction, addressed by the step's id. Used sparingly, and
+     only for fitting: a figure that needs 40 px less height on one particular
+     slide is not a new component.
+
+Anything that isn't a knob (margin, letter-spacing, a border…) can just be
+written as a normal declaration in the same block. */
+
+/* ── Deck-wide default ───────────────────────────────────────────────────────
+   A third shape, used sparingly: flipping a component's own default for this
+   deck only. Same specificity as card.css's `.card { text-align: left; }` — it
+   wins on load order alone, this file being the last one linked in <head>, so
+   nothing needs a second class. Centered reads better for the short, label-
+   like statements every card in this deck carries today; none currently holds
+   a `.bullets` or `.steps` list, where centered markers would read poorly —
+   worth a left-aligned modifier if one ever does. */
+.card { text-align: center; }
+
+/* Same idea for `.cols`: slide.css's own default is `align-items: start`
+   (top-aligned), which reads as unfinished the moment two columns land at
+   different heights — the shorter one looks like it drifted up rather than
+   sitting where it was put. `.cols.fill` still wins to `stretch` regardless
+   (0,2,0 beats this rule's 0,1,0), so equal-height comparisons are unaffected;
+   only the plain, uneven columns change, and centering is the one alignment
+   that reads as deliberate rather than accidental in both cases. */
+.cols { align-items: center; }
+
+/* ── Cover ──────────────────────────────────────────────────────────────────
+   `.box` is absolutely positioned by design, which is exactly what the two
+   corner-pinned credits want. The rest of the cover is normal flow. */
+
+.box.author {
+    --box-fg: var(--primary-07);
+    --box-bg: transparent;
+    --box-font-size: 34px;
+    --box-font-weight: bold;
+    --box-bottom: 44px;
+    --box-left: 64px;
+    letter-spacing: 0.04em;
+}
+
+.box.date {
+    --box-fg: var(--accent-07);
+    --box-bg: transparent;
+    --box-font-weight: bold;
+    --box-font-size: 30px;
+    --box-top: 40px;
+    --box-right: 56px;
+    letter-spacing: 0.1em;
+}
+
+.cover_meta {
+    margin-top: 30px;
+    font-size: 25px;
+    line-height: 1.5;
+    color: var(--neutral-07);
+}
+
+/* The cover headline is the one place in the deck where the type is allowed to
+   dominate the slide outright. */
+.slide.cover .headline { font-size: 128px; letter-spacing: 0.01em; }
+.slide.cover .lead     { max-width: 1250px; margin-top: 8px; }
+
+/* Le chapitre Réparation n'a plus de photo pleine page : comme #chap-atlas, il
+   double désormais comme vue d'ensemble du bloc (voir sa note dans le HTML), et
+   ce rôle exige un fond transparent — la grille doit se voir au travers. Sa
+   propre règle vit avec celles d'#chap-atlas, plus bas, sous « Les deux cadres
+   de parties », pour que les deux dividers restent l'un sous l'autre. */
+
+/* The first divider carries the product's own mark instead of a photograph.
+   Sized rather than scaled by its pixels: the logo file is a wide lockup and
+   the chapter slide is a left-aligned stack, so it only needs a height and a
+   bottom margin to sit on the same optical line as the eyebrow that follows.
+
+   The plate is not decoration. The mark is drawn in the product's own dark
+   navy, and a chapter slide is `--primary-09` — the far dark end of the ramp.
+   Recolouring the logo is not an option (it is someone else's artwork), so it
+   gets the light ground it was drawn for, and the padding keeps the ink off
+   the plate's edge. */
+
+.chapter_logo {
+    height: 74px;
+    width: auto;
+    margin-bottom: 30px;
+    align-self: flex-start;
+
+    box-sizing: content-box;
+    padding: 18px 34px;
+    border-radius: 16px;
+    background: #f4f2ee;
+}
+
+/* ── Les deux cadres de parties ─────────────────────────────────────────────
+   part_frame.css dessine le cadre et le laisse invisible ; c'est au deck de
+   dire quand il apparaît, parce que lui seul connaît l'id de ses vues
+   d'ensemble. impress.js pose `impress-on-<id>` sur <body> à chaque pas : il
+   suffit de nommer les deux pas de plan.
+
+   Le fondu dure ce que dure le vol (data-transition-duration = 800 ms), donc le
+   bloc se dessine pendant que la caméra recule et s'efface pendant qu'elle y
+   replonge.
+
+   Les deux pas de plan sont les chapitres eux-mêmes — #chap-atlas et
+   #chap-repa font chacun aussi office de vue d'ensemble de leur bloc (voir
+   leur note dans le HTML) — d'où impress-on-chap-atlas / impress-on-chap-repa
+   plutôt que des pas « map » dédiés. */
+
+body.impress-on-chap-atlas .part_frame[data-frame="atlas"],
+body.impress-on-chap-repa  .part_frame[data-frame="repa"] { opacity: 1; }
+
+/* Et pendant qu'un plan est à l'écran, le reste du deck s'efface : la charnière
+   et la conclusion sont à quelques milliers de pixels du bloc, ce qui suffit sur
+   un vidéoprojecteur 16:9 mais pas sur un écran plus haut. */
+body.impress-on-chap-atlas .step:not([data-block="atlas"]),
+body.impress-on-chap-repa  .step:not([data-block="repa"]) { opacity: 0; }
+
+/* Les deux blocs n'ont pas tout à fait la même échelle : Atlas (grille 6×3,
+   cadre 14320 large) est à 9, repa à 6.6 (voir le commentaire à côté de son
+   part_frame, dans le deck). L'étiquette de bloc y arrive donc légèrement plus
+   grande à l'écran que celle de Réparation. */
+
+/* ── Vue d'ensemble finale + voile de remerciement ────────────────────────────
+   deck-overview (voir sa note dans le HTML, juste avant #merci) recule la
+   caméra sur tout le canevas. Le voile qui l'accompagne, lui, vit hors de
+   #impress — voir le commentaire à côté de sa balise — donc `position: fixed`
+   y couvre vraiment tout l'écran, sans hériter du scale 15 du step. Il suit
+   la même mécanique que .part_frame : invisible par défaut, réveillé par le
+   impress-on-<id> que impress.js pose sur <body>.
+
+   Couleurs en dur plutôt qu'en variables de thème, comme le scrim de
+   .slide.chapter.photo (voir slide.css) : un voile doit rester lisible dans
+   les deux thèmes, pas suivre leur inversion. */
+
+.thanks_overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(6, 14, 28, 0.86);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.8s ease;
+}
+
+body.impress-on-deck-overview .thanks_overlay { opacity: 1; }
+
+.thanks_overlay_text {
+    font-size: 44px;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.3;
+    color: #f9f7f3;
+    text-align: center;
+}
+
+/* ── Mode « présentation complète » (touche M) ────────────────────────────────
+   Badge fixe, toggled by pkg/script/full-reveal.js via `full-reveal` sur
+   <body>. Couleurs en dur comme .thanks_overlay ci-dessus, pour la même
+   raison : un repère de mode doit rester lisible dans les deux thèmes, pas
+   suivre leur inversion. */
+
+.full_reveal_badge {
+    position: fixed;
+    left: 28px;
+    bottom: 28px;
+    z-index: 50;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 20px;
+    border-radius: 999px;
+    background: rgba(6, 14, 28, 0.86);
+    color: #f9f7f3;
+
+    font-size: 18px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+body.full-reveal .full_reveal_badge { opacity: 1; }
+
+.full_reveal_dot {
+    width: 10px;
+    height: 10px;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: var(--accent-07);
+}
+
+/* ── 02 · Sommaire ─────────────────────────────────────────────────────────
+   `.slide_body` stretches its child to the full slide width by default, so the
+   numbered list sits flush against the left padding. Centring the flex item
+   shrinks it to its own content width and lets the block sit in the middle of
+   the slide instead. */
+
+#plan .slide_body { align-items: center; }
+
+/* ── 03/04 · INGELIANCE, et où je me situe ─────────────────────────────────
+   Fusion des anciennes 03 (INGELIANCE) et 04 (Où je me situe, voir
+   l'historique git) : la rangée de chiffres est passée en pleine largeur
+   au-dessus (les deux cartes compactes qui vivaient dessous sont sorties),
+   et les deux images d'avant — la carte (presque carrée, 1225 × 1158) et
+   l'organigramme (16:9) — occupent maintenant seules le `.cols right` de
+   04. `1 fr / 1.45 fr` compense presque l'écart de format et les fait finir
+   à la même hauteur d'image. 620 px (la hauteur de 04 seule, sans rien
+   au-dessus) débordait sous la rangée de chiffres et poussait les deux
+   légendes hors de la diapo — redescendu à 460 pour leur laisser la place. */
+
+#entreprise .figure { --fig-h: 460px; }
+
+/* Les deux PNG ont un fond réellement transparent (54 % des pixels à alpha 0),
+   donc `bare` : ni plateau clair, ni bordure, ni padding — la carte et
+   l'organigramme se posent directement sur la slide. */
+
+/* Le calque du repère. `.figure img` garde ses `width: 100%` / `height:
+   --fig-h`, donc ce div fait exactement la taille de la boîte de l'image, et le
+   SVG en occupe tout l'espace : `bare` ayant retiré bordure et padding, il
+   partage le letterbox de `object-fit: contain` sans décalage. */
+#entreprise .fig_layer { position: relative; }
+
+#entreprise .map_pin {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+/* Le bleu encre de la carte elle-même — #13355B, celui de « Cherbourg » et
+   « Toulon » — plutôt qu'un blanc ou l'accent du deck : l'accent est justement
+   l'Ing_red du fond de carte, il disparaîtrait. Valeur en dur et non une
+   variable de thème : elle doit tenir face au rouge du PNG, qui ne s'inverse
+   pas quand le deck passe en sombre. */
+#entreprise .map_pin circle {
+    fill: none;
+    stroke: #13355B;
+    stroke-width: 9;
+}
+
+/* ── 08 · La problématique ──────────────────────────────────────────────────
+   `.quote_src` est écrit pour vivre *sous* la citation (margin-top). Ici il la
+   coiffe : on retourne la marge, rien d'autre — le centrage vient déjà du
+   `text-align: center` de `.quote` et du `justify-content: center` de
+   `.slide_body`. */
+
+.quote_src.over {
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+/* ── Per-slide fitting ──────────────────────────────────────────────────────
+   Height corrections only. Each one is here because that slide carries one more
+   band than the layout's default rhythm leaves room for.
+
+   Rappel : `--fig-h` est la hauteur du cadre, pas celle de l'image —
+   `object-fit: contain` fait le reste. Une valeur trop généreuse ne déforme
+   jamais un visuel, elle ajoute seulement du vide autour. */
+
+/* 06 · maintenant aussi la vue d'ensemble de la partie (voir sa note dans le
+   HTML) : fond transparent, pour que la grille des 18 pas suivants se voie au
+   travers du titre plutôt que de rester cachée derrière un aplat opaque. Le
+   texte perd le contraste que lui donnait --primary-09 en dessous, d'où
+   l'ombre portée — sans elle il devient illisible dès qu'un pas clair de la
+   grille passe derrière lui.
+
+   Chaque `.step` porte son propre `transform` (position sur le canevas), ce
+   qui lui ouvre son propre contexte d'empilement : un z-index posé sur
+   `.slide.chapter` ne jouerait donc que *dans* #chap-atlas, sans jamais
+   pouvoir dépasser le contenu d'un autre pas. Le z-index doit se poser sur
+   le pas lui-même. Sans lui, à égalité de z-index (`.slide` vaut 0 partout,
+   voir basic_elements.css), l'empilement suit l'ordre du DOM — et
+   #chap-atlas vient *avant* les 18 pas de la grille, donc en dessous.
+
+   Mais un z-index posé à demeure gagne contre *tout* pas de z-index:auto, pas
+   seulement contre la grille qu'il doit surplomber pendant son propre survol :
+   posé sans condition, #chap-atlas continuait de peindre par-dessus n'importe
+   quel autre pas ensuite, alors même que la caméra l'avait quitté depuis
+   longtemps — le tri par profondeur 3D ne rattrape pas un z-index explicite.
+   Les deux rustines ci-dessous, comme .part_frame plus haut : le z-index ne se
+   pose que pendant impress-on-chap-atlas (donc plus du tout une fois reparti),
+   et .slide.chapter repasse à opacity:0 par défaut — texte et filigrane
+   disparaissent réellement, indépendamment de tout ordre d'empilement. */
+body.impress-on-chap-atlas #chap-atlas { z-index: 10; }
+
+#chap-atlas .slide.chapter {
+    background: transparent;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+body.impress-on-chap-atlas #chap-atlas .slide.chapter { opacity: 1; }
+
+#chap-atlas .chapter_num,
+#chap-atlas .chapter_title,
+#chap-atlas .chapter_sub {
+    text-shadow: 0 4px 40px rgba(0, 0, 0, 0.7);
+}
+
+/* Le titre et le sous-titre en noir, en dur : `.slide.chapter` leur donne
+   --primary-01 (pensé pour un fond --primary-09 plein), trop clair une fois
+   le fond transparent. Pas une variable de thème — comme le voile de
+   #merci plus bas, ce texte doit rester lisible sans suivre l'inversion. */
+#chap-atlas .chapter_title,
+#chap-atlas .chapter_sub {
+    color: #000;
+}
+
+/* Le logo Atlas en filigrane derrière le titre de partie : masque plutôt
+   qu'image, pour qu'il prenne la couleur du fond et reste au même gris dans les
+   deux thèmes. */
+#chap-atlas .slide.chapter::after {
+   content: "";
+   position: absolute;
+   inset: 0;
+   z-index: -1;
+
+   background: #ffffff;
+   opacity: 0.2;
+
+   -webkit-mask: url('img/Logo_ATLAS_Dark.png') center / contain no-repeat;
+   mask: url('img/Logo_ATLAS_Dark.png') center / contain no-repeat;
+}
+
+/* #chap-repa fait le même métier, pour les mêmes raisons (voir le bloc
+   #chap-atlas juste au-dessus, y compris les deux rustines opacity/z-index).
+   Pas de filigrane ici, à la différence d'Atlas : Réparation n'a pas de logo,
+   et l'essai avec la photo Carter15 en fond n'a pas été gardé — le titre
+   flotte donc seul sur la grille transparente. */
+body.impress-on-chap-repa #chap-repa { z-index: 10; }
+
+#chap-repa .slide.chapter {
+    background: transparent;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+body.impress-on-chap-repa #chap-repa .slide.chapter { opacity: 1; }
+
+#chap-repa .chapter_num,
+#chap-repa .chapter_title,
+#chap-repa .chapter_sub {
+    text-shadow: 0 4px 40px rgba(0, 0, 0, 0.7);
+}
+
+/* Même noir en dur que #chap-atlas juste au-dessus, et pour la même raison. */
+#chap-repa .chapter_title,
+#chap-repa .chapter_sub {
+    color: #000;
+}
+
+/* 09 · les deux captures du graphe (1666 × 733 et 1704 × 746) sont côte à côte
+   dans la colonne large, sous la rangée des pistes : à ~510 px de large, elles
+   font 225 px de haut, et un cadre plus généreux n'ajouterait que du vide entre
+   la bande et le pied. */
+#atlas-pistes .figure { --fig-h: 250px; }
+
+/* 10 · le planning est un ruban (939 × 182) : au-delà de ~300 px de cadre, on
+   n'ajoute que du blanc au-dessus et en dessous. */
+#atlas-plan .figure { --fig-h: 300px; }
+
+/* 12 · idem pour la frise de l'état de l'art (780 × 111), plus plate encore. */
+#atlas-eda .figure { --fig-h: 230px; }
+
+/* 15 à 18 et 20 · les pas de la démonstration n'ont plus rien à cadrer : leur
+   corps est une liste de plans, que clip.css garde invisible. Les six règles
+   --fig-h qui vivaient ici sont parties avec les captures.
+
+   19b fait exception : deux figures (voir #atlas-demo-reuse-b dans le HTML)
+   rappellent que le graphe réutilisé dans ce clip est le calcul de frettage.
+   Elles vivent dans la colonne des 20 % d'un `.cols` local (20fr / 80fr) —
+   mais le clip lui-même ignore cette grille, puisqu'il vit hors de #impress
+   (voir clip.css), donc il faut le décaler à la main dans la colonne des
+   80 %. Pas de règle ici : `data-vid-x="509"` est posé directement sur le pas
+   dans le HTML, et c'est clip-player.js qui la lit (voir syncVidBox) — la
+   colonne de #atlas-demo-reuse-b n'est plus qu'à ouvrir le fichier du deck,
+   pas la feuille de style. */
+
+/* 19 · les deux états du badge se répondent — même hauteur, côte à côte. Ce
+   sont les seules captures qui restent dans la démonstration : partout ailleurs
+   c'est le clip qui montre le logiciel, mais la traçabilité n'est pas encore
+   tournée et ces deux images en sont la seule preuve. Elles ne doivent donc pas
+   être petites — et elles disparaîtront avec la règle, le jour du clip. */
+#atlas-tracabilite .figure { --fig-h: 520px; }
+
+/* 22 · la table des six exigences occupe la colonne large ; la capture CSV
+   l'accompagne dans la colonne étroite. */
+#atlas-bilan .figure { --fig-h: 480px; }
+
+/* Comme pour #entreprise (note plus haut) : tous les rendus CAO de la partie
+   Réparation (Carter*, assemblage, Etape_*, VueIso*, racd_contraintes,
+   RdS_Bague_generale) ont un fond réellement transparent, pas un fond blanc de
+   page — d'où `bare` sur chacune de leurs figures, du 25 au 32. */
+
+/* 26 · trois images qui arrivent une à une (substep sur les deux dernières).
+   `.cols.c3` passe d'une grille à 3 colonnes fixes à une ligne flexible
+   centrée : en grille, la première image restait coincée sur un tiers de la
+   largeur dès le départ, alors que rien d'autre n'occupait encore les deux
+   autres tiers. Ici chaque figure a une largeur explicite — pas de flex-grow,
+   dont l'animation n'est pas fiable partout ; `width`, si — qui rétrécit par
+   paliers via `:has()` au fur et à mesure que les substeps arrivent ; la
+   hauteur (--fig-h) ne bouge jamais, et montée près du maximum que la diapo
+   laisse (voir le budget de `.slide_body` — colonne de #entreprise plus haut)
+   pour ne plus laisser deux bandeaux vides au-dessus et en dessous. Comme la
+   ligne reste centrée, les images déjà là glissent vers la gauche pour faire
+   de la place — sans qu'aucune règle ne cible directement leur position.
+
+   Les trois largeurs visent chacune le budget réel de la ligne plutôt que des
+   valeurs arbitraires : `.slide.content.wide` fait 1880px, moins 2×44px de
+   padding = 1792px utiles, moins 40px de gap par intervalle. Une image seule
+   tient large (1792, plafonnée à 1200 pour ne pas coller aux bords) ; deux se
+   partagent (1792 − 40) / 2 ≈ 860 chacune ; trois, (1792 − 80) / 3 ≈ 560
+   chacune — la ligne occupe donc sa pleine largeur à chaque palier plutôt que
+   de laisser du vide, et le rétrécissement du 2ᵉ au 3ᵉ palier n'est plus que
+   ce qu'impose la place réellement disponible.
+
+   Les deux paliers (une image de plus / les trois) sont écrits en either/or
+   via `:not(:has(...))` plutôt qu'en laissant les deux règles se chevaucher :
+   sur ce dernier point une bataille de spécificité entre deux sélecteurs
+   `:has()` presque identiques faisait gagner le mauvais palier une fois les
+   trois images là. Rendre les conditions mutuellement exclusives supprime le
+   problème plutôt que de le corriger au cas par cas. */
+#repa-notation .cols.c3 {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 40px;
+}
+
+/* `.figcap` est écrit pour une figure dans une colonne de texte (aligné à
+   gauche comme le reste) ; ici chaque figure est seule dans sa propre
+   colonne étroite, donc sa légende se centre sous elle plutôt que de
+   s'aligner sur un bord qui n'existe pas ailleurs sur la diapo. */
+#repa-notation .cols.c3 .figcap { text-align: center; }
+
+#repa-notation .cols.c3 .figure {
+    flex: 0 0 auto;
+    width: 1200px;
+    --fig-h: 560px;
+    overflow: hidden;
+    transition: width 0.5s ease, opacity 0.45s ease, transform 0.45s ease;
+}
+
+/* Pas encore révélée : largeur nulle, donc hors du flux visuel — .substep
+   (reveal.css) gère déjà le fondu/la translation, on n'ajoute que la taille. */
+#repa-notation .cols.c3 .figure.substep { width: 0; }
+
+/* Exactement une image de plus est visible (pas les deux) : les deux
+   présentes se partagent une largeur intermédiaire, même hauteur. */
+#repa-notation .cols.c3:has(.substep-visible):not(:has(.substep-visible ~ .substep-visible)) .figure:not(.substep),
+#repa-notation .cols.c3:has(.substep-visible):not(:has(.substep-visible ~ .substep-visible)) .figure.substep-visible {
+    width: 860px;
+}
+
+/* Les trois sont là : encore un cran plus étroites pour tenir sur la ligne,
+   toujours à la même hauteur. */
+#repa-notation .cols.c3:has(.substep-visible ~ .substep-visible) .figure:not(.substep),
+#repa-notation .cols.c3:has(.substep-visible ~ .substep-visible) .figure.substep-visible {
+    width: 560px;
+}
+
+/* 27 · deux vues empilées dans la colonne étroite : l'ensemble monté, puis les
+   deux surfaces reprises à la réparation (Carter.png, bleu + rouge) — plus
+   besoin de la paire Carter3 / Carter7 d'avant. */
+#repa-contexte .figure { --fig-h: 360px; }
+
+/* 30 · Carter18 recap les deux solutions sur une seule planche, agrandie au
+   maximum de la place disponible (`fill`) ; les deux repères ("1 · Éprouvée",
+   "2 · Jamais appliquée") courent en légende dans le flux normal juste
+   dessous, plutôt qu'en incrustation à coordonnées fixes sur l'image —
+   essayé un temps (voir l'historique git), abandonné : trop fragile au
+   moindre changement de taille de la figure. Aucune règle de positionnement
+   n'est donc plus nécessaire ici. */
+
+/* 32 · trois vues de la bague sur une seule rangée. Le schéma de principe est
+   le seul visuel du deck plus petit que son cadre (282 × 202) : au-delà de
+   ~360 px il est agrandi au-delà de 2× et les aplats se mettent à baver. On le
+   laisse donc plus court que les deux rendus CAO — `align-items: start` sur
+   .figure_row les aligne par le haut, la différence ne se voit pas. */
+#repa-bague .figure { --fig-h: 520px; }
+#repa-bague .figure:last-child { --fig-h: 360px; }
+
+/* 33/34 · fusion de l'ancien schéma des contraintes (à côté des formules) et
+   des deux captures Atlas (qui se répondent, en rangée dessous) : les trois
+   restent à `sm` (300px, voir figure.css) plutôt que remontées à 560/600 —
+   c'est justement ce qui laisse tenir les deux anciennes diapos sur une
+   seule. Aucune règle dédiée n'est donc plus nécessaire ici. */
+
+/* 35 · Ce que j'en retire — essai n°2. Le n°1 (des cercles pleins, statiques,
+   voir l'historique git) restait un badge de plus : correct mais plat, rien
+   qui distingue le point du moment de ceux déjà dits. Ici c'est
+   `.substep-active` qui porte tout — chaque leçon est son propre pas
+   (`substep hold` : `hold` pour que les précédentes restent lisibles à pleine
+   opacité plutôt que de s'estomper à 0.55, une conclusion n'est pas un détail
+   qu'on relègue) et celle du moment se distingue par deux animations CSS
+   plutôt qu'une couleur statique :
+
+     1. le badge passe de carré arrondi à cercle et s'agrandit légèrement
+        (`border-radius` + `transform` en transition) ;
+     2. le texte se souligne d'un trait qui se dessine de gauche à droite, en
+        `background-size` plutôt qu'un `border-bottom` — ça s'anime, un trait
+        de bordure non.
+
+   (Un anneau en `conic-gradient` tournait aussi autour du badge actif dans un
+   premier essai — retiré, jugé trop chargé pour ce que la diapo doit dire.)
+
+   Toujours les deux mêmes panneaux (`.card.ghost.lessons_panel`) ; seul le
+   contenu de chaque `.lesson` change. */
+#lecons .lessons_panel {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 6px 4px;
+}
+
+#lecons .lesson {
+    display: flex;
+    align-items: center;
+    gap: 26px;
+    text-align: left;
+}
+
+#lecons .lesson_dot {
+    flex: 0 0 auto;
+    width: 68px;
+    height: 68px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: 'HeavyFont';
+    font-size: 24px;
+    color: var(--primary-01);
+    background: var(--neutral-06);
+    transform: scale(1);
+    transition: border-radius 0.5s ease, background 0.4s ease, transform 0.5s ease;
+}
+
+#lecons .lesson.substep-active .lesson_dot {
+    border-radius: 50%;
+    background: var(--accent-07);
+    transform: scale(1.1);
+}
+
+#lecons .lesson_text {
+    font-size: 30px;
+    line-height: 1.3;
+    padding-bottom: 4px;
+
+    background-image: linear-gradient(var(--accent-07), var(--accent-07));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 3px;
+    transition: background-size 0.6s ease;
+}
+
+#lecons .lesson.substep-active .lesson_text { background-size: 100% 3px; }
+
+/* 39 · la ligne des tuteurs (nowrap dans le HTML, voir #merci .chapter_sub
+   span) ne doit pas se faire couper par le max-width générique de
+   .chapter_sub (1150px, pensé pour une phrase courte) : élargi à la largeur
+   utile de .slide.chapter (1780px de large, moins 2 × 110px de padding). */
+#merci .chapter_sub { max-width: 1560px; }
+
+/* ── Speaker aids ───────────────────────────────────────────────────────────
+   impress-common.css already hides `.notes` in the deck itself; the console
+   (press P) renders them at its own size. Nothing else to do — the rule below
+   only makes the notes readable if the stylesheet ever fails to load, so a
+   missing file degrades into a visible script rather than a silent one. */
+
+.notes { font-size: 20px; line-height: 1.5; white-space: pre-line; }

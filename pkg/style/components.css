@@ -1,0 +1,30 @@
+/*=========================
+    Components — CSS side
+===========================
+
+The counterpart to theme.css. That file selects the typefaces and the named
+colour sets; this one selects the *elements* a deck is built from. Nothing is
+declared here either — one component per file under components/, listed once
+below, so a deck links a single stylesheet and a component can be added or
+dropped without editing any presentation.
+
+Load order matters in one place only: slide.css sets the layout shell that
+everything else sits inside, and reveal.css comes last because it animates
+elements the earlier files defined. Between those two the order is free —
+components never override each other, they only publish their own knobs.
+
+Paths are relative to this file. @import must stay above any rule. */
+
+@import url('components/slide.css');
+@import url('components/typography.css');
+@import url('components/card.css');
+@import url('components/stat.css');
+@import url('components/table.css');
+@import url('components/list.css');
+@import url('components/figure.css');
+@import url('components/callout.css');
+@import url('components/org.css');
+@import url('components/part_frame.css');
+@import url('components/progress.css');
+@import url('components/clip.css');
+@import url('components/reveal.css');

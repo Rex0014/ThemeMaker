@@ -1,0 +1,264 @@
+/*=========================
+    Slide — the layout shell
+===========================
+
+basic_elements.css gives `.slide` its box: 1720×880, centred in the 1920×1080
+`.scene`, absolutely positioned so impress.js can transform the scene around it.
+This file adds the *kinds* of slide a talk actually needs, as modifiers on that
+same element:
+
+    <div class="slide content">   a titled content slide  (the workhorse)
+    <div class="slide cover">     the opening slide
+    <div class="slide chapter">   a part divider
+
+Same rule as everywhere else in this deck: two classes on one element beat the
+bare `.slide`, so declaration order in this file never bites. Each modifier only
+sets what it changes.
+
+Inside a `.slide.content` the vertical rhythm is fixed and always the same three
+bands — head / body / foot — so no slide has to invent its own spacing:
+
+    <div class="slide content">
+        <div class="slide_head"> eyebrow + title </div>
+        <div class="slide_body"> anything        </div>
+        <div class="slide_foot"></div>
+    </div>
+
+Only `.slide_body` flexes; head and foot keep their natural height. That is what
+makes every title in the deck land on the same baseline.
+
+The foot is left empty in the markup: pkg/script/slide-foot.js fills it at load
+with the part name, the progress bar (progress.css) and the slide number, all
+three read off the deck itself. */
+
+.slide {
+    /* Knobs a modifier is expected to turn. */
+    --slide-pad: 48px 64px 36px;
+    --slide-gap: 26px;
+    --slide-rule: var(--primary-07);
+    --slide-muted: var(--neutral-06);
+    --slide-line: var(--neutral-04);
+}
+
+/* ── The workhorse ──────────────────────────────────────────────────────────
+   Wider and taller than the base slide: a talk slide carries a table or a
+   figure, and the base box was sized for a centred statement. */
+
+.slide.content {
+    /* border-box so the numbers below are the *outer* size of the slide. The
+       scene is 1920×1080 and there is no room to discover, after the fact, that
+       the padding pushed a `wide` slide past its edge. */
+    box-sizing: border-box;
+    width: 1780px;
+    height: 1000px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    text-align: left;
+
+    padding: var(--slide-pad);
+    gap: var(--slide-gap);
+
+    font-size: 30px;
+    line-height: 1.45;
+    color: var(--neutral-08);
+}
+
+/* `wide` trades the side margins for content width — for the big comparison
+   tables, which are the only things in the deck that genuinely need it. */
+.slide.content.wide {
+    width: 1880px;
+    padding: 44px 44px 30px;
+}
+
+.slide_head {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+
+    padding-bottom: 16px;
+    border-bottom: 4px solid var(--slide-rule);
+}
+
+.slide_body {
+    flex: 1 1 auto;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--slide-gap);
+}
+
+/* `top` when the content should hang from the title rather than float in the
+   middle of the band — lists of unequal length read better that way. */
+.slide_body.top { justify-content: flex-start; }
+
+.slide_foot {
+    /* Both labels take a fixed width, so the bar between them starts and ends
+       at the same x on every slide. Sized to the longest part name: let them
+       size to their text instead and the bar visibly shifts left and right as
+       "Transition" gives way to "Partie 2 — Réparation". */
+    --foot-part-w: 340px;
+    --foot-num-w: 110px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+
+    padding-top: 12px;
+    border-top: 2px solid var(--slide-line);
+
+    font-size: 20px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--slide-muted);
+}
+
+.slide_foot_part { flex: 0 0 var(--foot-part-w); }
+
+.slide_foot_num  {
+    flex: 0 0 var(--foot-num-w);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ── Columns ────────────────────────────────────────────────────────────────
+   One grid, four ratios. `.cols` alone is a single column, which is what you
+   want on a phone-sized preview and harmless at 1920. */
+
+.cols {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    align-items: start;
+    min-height: 0;
+}
+
+.cols.c2      { grid-template-columns: 1fr 1fr; }
+.cols.c3      { grid-template-columns: 1fr 1fr 1fr; }
+.cols.c4      { grid-template-columns: repeat(4, 1fr); }
+.cols.left    { grid-template-columns: 1.45fr 1fr; }   /* text-heavy left  */
+.cols.right   { grid-template-columns: 1fr 1.45fr; }   /* text-heavy right */
+
+/* Make the tracks the same height — needed whenever the columns hold cards. */
+.cols.fill    { align-items: stretch; }
+
+/* A column that is itself a stack. Saves writing an inline flex on every div. */
+.stack {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    min-height: 0;
+}
+
+.stack.tight  { gap: 10px; }
+.stack.loose  { gap: 30px; }
+.stack.center { align-items: center; text-align: center; justify-content: center; }
+
+/* ── Cover ──────────────────────────────────────────────────────────────────
+   Kept as a plain centred stack so the existing `.titlebox` / `.box` elements
+   from basic_elements.css still work on it unchanged. */
+
+.slide.cover {
+    box-sizing: border-box;
+    width: 1780px;
+    height: 1000px;
+    gap: 14px;
+    padding: 64px;
+    background-color: var(--neutral-05);
+}
+
+/* ── Chapter divider ────────────────────────────────────────────────────────
+   No head/body/foot: one number, one title, one line. It exists to let the
+   audience — and the speaker — breathe between parts.
+
+   Adding `photo` turns it into a photographic divider. The photo itself is a
+   plain `background-image` the deck sets on the element — deliberately *not* a
+   custom property. Chrome resolves a url() inside a custom property against the
+   stylesheet that reads the variable, which would be this file, so any relative
+   path the deck wrote would be looked up next to slide.css instead of next to
+   the deck. A normal declaration in the deck's own stylesheet has no such
+   problem:
+
+       #chap-repa .slide.chapter.photo {
+           background-image: url('img/aeronef.png');
+       }
+
+   The scrim is painted by ::before rather than stacked into the same
+   background-image, so the deck never has to restate it. It is a fixed dark
+   wash rather than a ramp step: it sits over an arbitrary photograph, not over
+   a themed surface, so it must not follow the light/dark inversion or it would
+   stop doing its job in one of the two themes. */
+
+.slide.chapter {
+    box-sizing: border-box;
+    width: 1780px;
+    height: 1000px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    text-align: left;
+
+    padding: 0 110px;
+    gap: 14px;
+
+    background-color: var(--primary-09);
+    color: var(--primary-01);
+    overflow: hidden;
+}
+
+.slide.chapter.photo {
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    color: #f9f7f3;
+}
+
+.slide.chapter.photo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right,
+                                rgba(6, 14, 28, 0.95) 0%,
+                                rgba(6, 14, 28, 0.82) 42%,
+                                rgba(6, 14, 28, 0.18) 100%);
+}
+
+/* Lift the text out of the scrim's stacking order. */
+.slide.chapter.photo > * { position: relative; }
+
+/* Position 04, not the 07 the rest of the deck uses for accent text: this label
+   sits on `--primary-09`, a surface at the far end of its ramp, so the accent
+   has to come from the far end of its own to stay legible — in either theme. */
+.chapter_num {
+    font-family: 'HeavyFont';
+    font-size: 30px;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    color: var(--accent-04);
+}
+
+.slide.chapter.photo .chapter_num { color: #ff8a70; }
+
+.chapter_title {
+    font-family: 'HeavyFont';
+    font-size: 118px;
+    line-height: 1.02;
+    letter-spacing: 0.01em;
+    max-width: 1400px;
+}
+
+.chapter_sub {
+    font-size: 34px;
+    font-weight: 300;
+    max-width: 1150px;
+    opacity: 0.82;
+    margin-top: 10px;
+}

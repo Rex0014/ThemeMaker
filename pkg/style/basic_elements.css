@@ -1,0 +1,126 @@
+
+/* Base Definition */
+
+.scene {
+    width: 1920px;
+    height: 1080px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+body {
+    background-color: var(--neutral-02);
+    font-family: 'MyFont';
+    font-size: 96px;
+    font-weight: normal;
+    color: var(--neutral-03);
+}
+
+/* Base Elements */
+
+.scene_img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%);
+
+    max-width: 1920px;
+    max-height: 1080px;
+    width: auto;
+    height: auto;
+}
+
+.slide {
+    width: 1720px;
+    height: 880px;
+    z-index: 0;
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 16px;
+    background-color: var(--neutral-03);
+    padding: 32px;
+    color: var(--neutral-08);
+    font-size: 28px;
+    opacity: 1;
+}
+
+.title {
+    font-weight: bold;
+    font-size: 96px;
+    color: var(--neutral-0);
+    background: transparent;
+    position: absolute;
+}
+
+.titlebox {
+    font-weight: bold;
+    font-size: 96px;
+    color: var(--primary-09);
+    background: var(--primary-04);
+    padding: 32px;
+    border-radius: 32px;
+    position: absolute;
+}
+
+/* The knobs an override class is expected to turn. Redeclare any of these in
+   a modifier (.box.date) and only that property changes — everything else
+   keeps falling back to the base value. */
+.box {
+    --box-bg: var(--neutral-02);
+    --box-fg: var(--neutral-09);
+    --box-max-width: 640px;
+    --box-radius: 20px;
+    --box-padding: 16px 32px;
+    --box-font-size: 32px;
+    --box-font-weight: normal;
+    --box-align: center;
+
+    /* Offsets: 'auto' on all four = impress leaves it at its static spot. */
+    --box-top: auto;
+    --box-right: auto;
+    --box-bottom: auto;
+    --box-left: auto;
+
+    box-sizing: border-box;
+    width: max-content;
+    max-width: var(--box-max-width);
+    border-radius: var(--box-radius);
+    background-color: var(--box-bg);
+    color: var(--box-fg);
+    padding: var(--box-padding);
+    font-size: var(--box-font-size);
+    font-weight: var(--box-font-weight);
+    opacity: 0;
+    transform: translateY(-80px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+
+    position: absolute;
+    top: var(--box-top);
+    right: var(--box-right);
+    bottom: var(--box-bottom);
+    left: var(--box-left);
+
+    display: flex;
+    flex-direction: column;
+    align-items: var(--box-align);
+    justify-content: center;
+    text-align: var(--box-align);
+}
+
+.step.active .box,
+.step.active .box_list {
+    opacity: 1;
+    transform: translateY(0px);
+}
+
+.step.past .box,
+.step.past .box_list {
+    opacity: 0;
+    transform: translateY(80px);
+}
