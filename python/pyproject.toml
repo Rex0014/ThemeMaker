@@ -1,0 +1,9 @@
+[project]
+name = "theme-maker"
+version = "0.1.0"
+description = "One base hex per colour role in, an 11-step light/dark CSS variable ramp out."
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

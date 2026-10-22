@@ -1,0 +1,19 @@
+{
+  "name": "theme-maker",
+  "version": "0.1.0",
+  "description": "One base hex per colour role in, a configurable-length light/dark CSS variable ramp out.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "serve": "pnpm build && python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

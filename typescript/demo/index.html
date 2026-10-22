@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Theme Maker</title>
+<link rel="stylesheet" href="theme-maker.css">
+</head>
+<body>
+
+<header class="toolbar">
+    <div id="role-rows"></div>
+    <div class="toggle-row">
+        <label for="dark-toggle" class="role-label">Dark</label>
+        <input type="checkbox" id="dark-toggle">
+    </div>
+    <button class="btn" id="export-btn">Export CSS</button>
+</header>
+
+<textarea id="css-output" hidden readonly></textarea>
+
+<main>
+    <span class="eyebrow">Theme Maker · preview</span>
+    <h1 class="headline">One colour, eleven shades.</h1>
+    <p class="lead">
+        Pick a base colour per role above — <span class="key">neutral</span>,
+        <span class="key">accent</span>, <span class="key">success</span>,
+        <span class="key">failure</span> — and this panel updates live using
+        the same card and type system as the Soutenance deck.
+    </p>
+
+    <h2 class="slide_title">Card variants</h2>
+    <div class="card_grid">
+        <div class="card">
+            <span class="card_label">Default</span>
+            <span class="card_title">Base card</span>
+            Plain surface, <span class="mono">--neutral-01</span> background.
+        </div>
+        <div class="card accent">
+            <span class="card_label">Emphasis</span>
+            <span class="card_title">Accent card</span>
+            The one card on the slide that carries the point.
+        </div>
+        <div class="card chosen">
+            <span class="card_label">Decision</span>
+            <span class="card_title">Chosen card</span>
+            The option retained after a comparison — <span class="num">1</span> of 3.
+        </div>
+        <div class="card ghost">
+            <span class="card_label">Structure</span>
+            <span class="card_title">Ghost card</span>
+            Transparent background, border only.
+        </div>
+        <div class="card solid">
+            <span class="card_label">Dominant</span>
+            <span class="card_title">Solid card</span>
+            Reversed colours for the single card that must dominate.
+        </div>
+        <div class="card rule">
+            <span class="card_title">Rule card</span>
+            A left rule instead of a box — for a quote or an aside.
+        </div>
+    </div>
+
+    <h2 class="slide_title" style="margin-top:28px;">Type scale</h2>
+    <p class="subhead">Subhead line</p>
+    <p class="small dim">Small, dimmed running text — <span class="hl">highlighted</span> word included.</p>
+</main>
+
+<script type="module" src="main.js"></script>
+</body>
+</html>
