@@ -95,3 +95,12 @@ theme.add_role({"warning", "Warning", "#C98A1F", false});
 
 std::string css = theme.render_css();
 ```
+## About
+
+**Author**: Rex Guil (Rex0014) - With the Help of Claude Code (OPUS 5.5)
+
+The objective here was to create a basic theme system that could be applyable to a variaty of situations. Has worked for me so far, so why not share it?
+
+**Licence**: GPL 3.0
+
+**Version**: 1.0 - Released on 23/10/2026
