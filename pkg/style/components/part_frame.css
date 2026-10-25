@@ -1,0 +1,111 @@
+/*=========================
+    Part frame & map step
+===========================
+
+impress.js lays a deck out on one infinite canvas, and that canvas is the only
+place a talk can show its own shape. These two elements make that shape visible:
+
+    .map          a step with no slide inside it, placed at the centre of a
+                  part and scaled to frame the whole of it — the audience sees
+                  the part as a plan, then the next step dives into it
+    .part_frame   a border drawn around that part, so two parts sitting on the
+                  same canvas read as two separate blocks rather than as one
+                  long field of slides
+
+A frame is *not* a step. It is a plain div among the steps, positioned in
+impress's own coordinates: impress moves every child of #impress into the
+canvas, and centres each step on its `data-x` / `data-y` with a
+translate(-50%,-50%). The frame repeats that convention through four custom
+properties, so a deck writes the same numbers it already writes on its steps:
+
+    <div class="part_frame" data-frame="atlas"
+         style="--fx:3600px; --fy:4200px; --fw:9520px; --fh:4280px">
+        <div class="part_frame_label">Partie 1 — Atlas</div>
+    </div>
+
+    --fx / --fy   centre of the block, in canvas coordinates
+    --fw / --fh   its size — the extent of the grid of steps, plus a margin
+
+Sizing the two together: a step at `data-scale="S"` shows an area of
+1920·S × 1080·S, whatever the window. Pick S so that the frame *and* its label
+fit inside that, with room to breathe — the label hangs above the frame, so the
+vertical margin has to clear it.
+
+Frames are hidden except while a map step is showing, and the fade rides the
+same transition as the flight, so the block draws itself as the deck pulls back
+and dissolves as it dives in. The rule is written per deck, because it names the
+map steps by id:
+
+    body.impress-on-atlas-map .part_frame[ data-frame="atlas" ] { opacity: 1; }
+
+Nothing here is interactive: `pointer-events: none` keeps a frame from ever
+catching a click meant for a step underneath it. */
+
+.part_frame {
+    --frame-line: var(--neutral-05);
+    --frame-radius: 80px;
+
+    position: absolute;
+    left: 0;
+    top: 0;
+    box-sizing: border-box;
+
+    width: var(--fw);
+    height: var(--fh);
+    transform: translate(-50%, -50%) translate(var(--fx), var(--fy));
+
+    border: 8px dashed var(--frame-line);
+    border-radius: var(--frame-radius);
+
+    /* Only ever visible on a map step; the deck says which. */
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    pointer-events: none;
+}
+
+/* ── The label ──────────────────────────────────────────────────────────────
+   Sized for a canvas seen from far away: at a map scale of ~5 these 200 px land
+   at about 36 px on the wall. It sits *outside* the frame, above its top-left
+   corner, which is also what keeps it off screen when the deck is zoomed into
+   one of the slides inside. */
+
+.part_frame_label {
+    position: absolute;
+    left: 30px;
+    bottom: calc(100% + 48px);
+
+    font-family: 'HeavyFont';
+    font-size: 200px;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--frame-line);
+}
+
+/* ── The map step ───────────────────────────────────────────────────────────
+   Empty by design — it carries speaker notes and nothing else. The rule exists
+   so the class means something to read in the markup, and so a stray element
+   dropped into a map step cannot paint over the plan it is meant to show. */
+
+.step.map { background: none; }
+.step.map > *:not(.notes) { display: none; }
+
+/* ── Keeping the neighbours out ─────────────────────────────────────────────
+   A step at `data-scale="S"` is *guaranteed* to show 1920·S × 1080·S of canvas,
+   but a window that is not 16:9 shows more than that in one direction — and
+   what it shows is whatever the deck put next to the block. Spacing alone can
+   only be tuned for one aspect ratio, so the blocks say who they belong to and
+   everything else steps aside while a map is on screen.
+
+   Each step of a part carries `data-block="<name>"`, and the deck writes one
+   rule per map step:
+
+       body.impress-on-atlas-map .step:not( [ data-block="atlas" ] ) {
+           opacity: 0;
+       }
+
+   The transition is over the same 0.8 s as the flight, so the surroundings melt
+   away as the camera pulls back and are already there again when it dives in. */
+
+.step { transition: opacity 0.8s ease; }

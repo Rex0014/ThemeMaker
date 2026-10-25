@@ -1,0 +1,104 @@
+/*=========================
+    Callout, quote & formula
+===========================
+
+Three ways of setting one block apart from the flow of a slide.
+
+    .callout   a framed statement — a requirement, a constraint, a verdict
+    .quote     a sentence quoted verbatim (the subject of the internship,
+               a requirement as it was written, a user's feedback)
+    .formula   a centred equation, in the serif-free stack the rest of the deck
+               uses, because a screenshot of LaTeX would not survive projection
+
+`.callout` shares the knob names of `.card` on purpose: they are close cousins,
+and a reader who has learned one already knows the other. It differs in intent —
+a card is one of several, a callout is alone on its slide. */
+
+.callout {
+    --callout-bg: var(--neutral-02);
+    --callout-fg: var(--neutral-09);
+    --callout-accent: var(--accent-07);
+    --callout-size: 34px;
+
+    /* Block for the same reason `.card` is: the body is running text carrying
+       inline emphasis, which a flex container would break onto its own line. */
+    box-sizing: border-box;
+    display: block;
+
+    padding: 26px 34px;
+    border-left: 10px solid var(--callout-accent);
+    border-radius: 0 16px 16px 0;
+    background: var(--callout-bg);
+    color: var(--callout-fg);
+
+    font-size: var(--callout-size);
+    line-height: 1.35;
+    text-align: left;
+}
+
+.callout_label {
+    display: block;
+    margin-bottom: 8px;
+
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--callout-accent);
+}
+
+.callout.neutral { --callout-accent: var(--primary-07); }
+.callout.ok      { --callout-accent: var(--success-07); }
+.callout.small   { --callout-size: 27px; padding: 18px 26px; }
+
+/* ── Quote ──────────────────────────────────────────────────────────────── */
+
+.quote {
+    font-size: 40px;
+    font-weight: 300;
+    font-style: italic;
+    line-height: 1.32;
+    color: var(--primary-07);
+    text-align: center;
+    max-width: 1450px;
+    margin: 0 auto;
+}
+
+.quote_src {
+    display: block;
+    margin-top: 14px;
+    font-size: 22px;
+    font-style: normal;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--neutral-06);
+}
+
+.quote.small { font-size: 30px; }
+
+/* ── Formula ────────────────────────────────────────────────────────────── */
+
+.formula {
+    display: block;
+    padding: 18px 26px;
+    border-radius: 14px;
+    background: var(--neutral-01);
+    border: 2px solid var(--neutral-04);
+
+    font-size: 30px;
+    color: var(--neutral-09);
+    text-align: center;
+}
+
+.formula_note {
+    display: block;
+    margin-top: 8px;
+
+    font-size: 19px;
+    line-height: 1.3;
+    color: var(--neutral-06);
+}
+
+/* Sub- and superscripts inside a formula: keep them from opening up the line. */
+.formula sub, .formula sup { font-size: 0.62em; line-height: 0; }

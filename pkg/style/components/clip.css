@@ -1,0 +1,273 @@
+/*=========================
+    Clip — the demonstration layer
+===========================
+
+The stage a screen recording is shown on, above the deck and below its chrome.
+clip-player.js builds every element here; a deck only ever writes `data-clip`
+on a step or a substep and never touches this markup.
+
+    #clip_stage          the layer — opaque, hidden until a clip is playing
+      .clip_frame        the 1920×1080 rectangle, scaled to fit the window
+        .clip_video      one per file, only the current one carries `.on`
+        .clip_head       the step's eyebrow and title, redrawn over the film
+          .clip_time     elapsed / total of the slice, in m:ss
+        .clip_bar        how far into the slice we are
+        .clip_replay     the key that plays the slice again
+
+Two states, both set by the player:
+
+    .visible   a clip is on screen
+    .held      that clip has reached its last frame and frozen there
+
+The layer is transparent and the film is a figure inside the slide: it fills
+the `.slide_body` band and nothing else, so the slide keeps its ground, its
+rule and its foot while the demonstration runs.
+
+It is still a fixed, viewport-level layer rather than an element in the slide's
+markup. A <video> sitting inside a `.step` would inherit the deck's 3-D
+transform, which costs a compositor layer per decoded frame — the one thing
+worth avoiding in front of a room. Placed here, in the deck's own coordinates,
+it lands in exactly the same rectangle without ever being transformed.
+
+The one thing drawn *over* the slide is the heading. A slide that runs ten
+plans is ten passages of the talk, and each names its own (`| title` in the
+shot list), so the slide's own head is hidden — `.step.filmed` — and this one
+takes its place, at the same coordinates, in the same type.
+
+── Deck pixels ──────────────────────────────────────────────────────────────
+
+`--u` is one unit of the deck's own 1920×1080 coordinate system, in real
+pixels. impress.js fits the deck with scale = min(innerWidth/1920,
+innerHeight/1080); the same expression in CSS gives the same number, so
+everything below can be written in the deck's units and land exactly where the
+slide underneath had put it. The title does not move when the film starts —
+it changes colour, because it is now sitting on a dark scrim, and nothing else.
+
+The numbers come from the slide itself: `.slide.content.wide` is 1780+100 wide
+and 1000 tall inside a 1920×1080 scene, with 44px of padding, which puts the
+head at 64,84 with a width of 1792. Under it, once the head (121.5), the foot
+(43) and the two 26px gaps are taken out, the body band runs y 231.5 → 941 —
+709 tall. The rushes are 1280×720, so the largest 16:9 that fits that band is
+1260×709, which is also their native size: the film is shown pixel for pixel
+rather than blown up to the projector's width. Change the slide and change the
+four numbers below. */
+
+/* The shot list is the slide's source, not its content: it says which film to
+   run and never appears itself. Hidden rather than removed so it stays where
+   it is edited — inside the slide it describes — and so impress's substep
+   plugin can still count its lines. */
+.film { display: none; }
+
+#clip_stage {
+    --u: min(100vw / 1920, 100vh / 1080);
+
+    /* The picture, in deck pixels: the `.slide_body` band, centred. */
+    --vid-x: 330;
+    --vid-y: 231;
+    --vid-w: 1260;
+    --vid-h: 709;
+
+    --clip-ink: rgba(255, 255, 255, 0.94);
+    --clip-fade: 260ms;
+
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+
+    /* No ground of its own. An opaque layer here is what put black bands above
+       and below the deck on any window that is not exactly 16:9 — the mat was
+       filling everything `.clip_frame` did not. The slide is the ground now. */
+    background: transparent;
+
+    /* Never in the way: impress keeps its own click-to-navigate behaviour, and
+       the layer is driven from the keyboard alone. */
+    pointer-events: none;
+
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--clip-fade) ease, visibility 0s linear var(--clip-fade);
+}
+
+#clip_stage.visible {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity var(--clip-fade) ease, visibility 0s;
+}
+
+/* The deck's own rectangle, to the pixel — so the film's edges and the slide's
+   edges are the same edges, and the heading drawn on top of one lines up with
+   the heading drawn inside the other. */
+.clip_frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    width: calc(1920 * var(--u));
+    height: calc(1080 * var(--u));
+    transform: translate(-50%, -50%);
+}
+
+/* All the loaded files are stacked here and only one is shown, so moving
+   between two substeps cut from the same recording is a seek — no reload, no
+   black frame between them.
+
+   The box is exactly 16:9 and the rushes are exactly 16:9, so `contain` never
+   actually letterboxes; it is kept as the safe behaviour if a clip is ever
+   recorded at another ratio. */
+.clip_video {
+    position: absolute;
+    left:   calc(var(--vid-x) * var(--u));
+    top:    calc(var(--vid-y) * var(--u));
+    width:  calc(var(--vid-w) * var(--u));
+    height: calc(var(--vid-h) * var(--u));
+
+    object-fit: contain;
+    border-radius: calc(14 * var(--u));
+
+    opacity: 0;
+}
+
+.clip_video.on { opacity: 1; }
+
+/* ── The heading ────────────────────────────────────────────────────────────
+   Same place, same size, same rule as the slide's own — 64,84 is where
+   `.slide.content.wide` puts its head, and this has to land on it to the pixel,
+   because the slide's is hidden underneath and any drift would read as the
+   title jumping when the film starts.
+
+   No scrim any more: the words sit on the slide's own ground, not on a screen
+   recording, so there is nothing to buy them contrast against. */
+
+.clip_head {
+    position: absolute;
+    left: calc(64 * var(--u));
+    top: calc(84 * var(--u));
+    width: calc(1792 * var(--u));
+
+    padding-bottom: calc(16 * var(--u));
+    border-bottom: calc(4 * var(--u)) solid var(--primary-07);
+}
+
+/* Its own head steps aside while the layer draws the plan's title in its
+   place. `visibility`, not `display`: the box stays, so the body band the film
+   is sized against does not move. */
+.step.filmed .slide_head { visibility: hidden; }
+
+.clip_eyebrow {
+    font-size: calc(22 * var(--u));
+
+    /* The slide's eyebrow inherits 1.45 from `.slide.content`; here it would
+       inherit the body's. Seven pixels of difference, all of which land on the
+       title below it — enough to make the line jump when the film starts. */
+    line-height: 1.45;
+
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent-07);
+}
+
+/* Elapsed / total of *this slice* — the number a jury reads instead of
+   guessing from the bar. Same row as the eyebrow, opposite corner, so it
+   never competes with the title for the eye. */
+.clip_time {
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    font-variant-numeric: tabular-nums;
+    font-size: calc(22 * var(--u));
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    line-height: 1.45;
+    color: var(--accent-07);
+}
+
+.clip_title {
+    margin-top: calc(6 * var(--u));
+
+    font-family: 'HeavyFont';
+    font-size: calc(60 * var(--u));
+    line-height: 1.06;
+    letter-spacing: 0.005em;
+
+    /* The slide's ink, not the film's: this heading is now on the slide. */
+    color: var(--neutral-09);
+}
+
+/* ── Slice progress ─────────────────────────────────────────────────────────
+   How much of *this slice* has run — not of the file, and not of the talk. It
+   answers the only question a speaker asks mid-clip, which is whether to keep
+   talking or to move on.
+
+   Drawn on the rule under the title rather than along the foot of the frame,
+   for two reasons. impress.js already owns the foot, and a second hairline a
+   few pixels from the deck's own would read as one bar behaving strangely.
+   And the rule is where the eye already is: it belongs to the passage the
+   title just named, which is exactly what it measures.
+
+   Scaled rather than resized: a transform stays on the compositor, so the bar
+   costs nothing while the film decodes beside it. */
+
+.clip_bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: calc(-4 * var(--u));
+
+    /* Exactly the head's border, laid over it — the deck's rule stays visible
+       as the track, so nothing is added to the slide, only filled in. */
+    height: calc(4 * var(--u));
+}
+
+.clip_bar > i {
+    --fill: 0;
+
+    display: block;
+    height: 100%;
+
+    background: var(--accent-07);
+
+    transform: scaleX(var(--fill));
+    transform-origin: left center;
+}
+
+/* Frozen on the last frame: the bar goes quiet and the key that plays the
+   slice again names itself. Both appear only in that state — during playback
+   there is nothing to offer and nothing to distract. */
+
+#clip_stage.held .clip_bar > i { background: var(--neutral-05); }
+
+/* On its own ground rather than on a shadow: the frozen frame is a screenshot
+   of a light application, and pale ink laid straight on it is unreadable at
+   the back of the room — which is the only place this hint matters. */
+.clip_replay {
+    position: absolute;
+
+    /* Tucked into the picture's own bottom-right corner, which is no longer
+       the frame's: derived from the video box so the two move together. */
+    right:  calc((1920 - var(--vid-x) - var(--vid-w) + 24) * var(--u));
+    bottom: calc((1080 - var(--vid-y) - var(--vid-h) + 24) * var(--u));
+
+    padding: calc(8 * var(--u)) calc(18 * var(--u));
+    border-radius: calc(10 * var(--u));
+    background: rgba(7, 11, 18, 0.78);
+
+    font-size: calc(24 * var(--u));
+    letter-spacing: 0.14em;
+    color: var(--clip-ink);
+
+    opacity: 0;
+    transition: opacity 180ms ease;
+}
+
+#clip_stage.held .clip_replay { opacity: 0.72; }
+
+/* impress.js draws the deck's own progress bar straight onto <body>, with no
+   stacking context of its own — an opaque layer over the whole viewport would
+   simply bury it. It is the speaker's clock, and the one part of the slide's
+   foot the film does not replace, so it is lifted one notch above the film
+   rather than hidden with the slide. */
+
+.impress-progressbar,
+.impress-progress { z-index: 41; }

@@ -1,0 +1,84 @@
+/*=========================
+    Stat & Badge
+===========================
+
+Two small components that share one job: turning a fact into something readable
+in half a second from the back of a room.
+
+`.stat` is a number with its unit under it — company figures, code metrics,
+anything the audience should register without reading a sentence.
+
+    <div class="stat"><div class="stat_value">48 Mo</div>
+                      <div class="stat_label">exécutable portable</div></div>
+
+`.badge` is a status pill — the "Atteinte / À confirmer" column of the
+requirements table. Its three states come from three different ramps, so the
+colour alone carries the verdict even from a distance. */
+
+/* ── Stat ───────────────────────────────────────────────────────────────── */
+
+.stat {
+    --stat-fg: var(--accent-07);
+    --stat-label-fg: var(--neutral-06);
+    --stat-size: 76px;
+    --stat-align: flex-start;
+
+    display: flex;
+    flex-direction: column;
+    align-items: var(--stat-align);
+    gap: 2px;
+    text-align: left;
+}
+
+.stat_value {
+    font-family: 'HeavyFont';
+    font-size: var(--stat-size);
+    line-height: 1;
+    color: var(--stat-fg);
+}
+
+.stat_label {
+    font-size: 22px;
+    line-height: 1.25;
+    color: var(--stat-label-fg);
+    max-width: 340px;
+}
+
+.stat.center  { --stat-align: center; text-align: center; }
+.stat.big     { --stat-size: 108px; }
+.stat.small   { --stat-size: 52px; }
+.stat.neutral { --stat-fg: var(--primary-07); }
+
+.stat_row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 40px;
+}
+
+/* ── Badge ──────────────────────────────────────────────────────────────── */
+
+.badge {
+    --badge-fg: var(--primary-07);
+    --badge-bg: transparent;
+    --badge-border: var(--primary-07);
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 4px 16px;
+    border: 2px solid var(--badge-border);
+    border-radius: 999px;
+    background: var(--badge-bg);
+    color: var(--badge-fg);
+
+    font-size: 21px;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+
+.badge.ok   { --badge-fg: var(--success-07); --badge-border: var(--success-07); }
+.badge.warn { --badge-fg: var(--accent-07);  --badge-border: var(--accent-07); }
+.badge.off  { --badge-fg: var(--neutral-06); --badge-border: var(--neutral-05); }

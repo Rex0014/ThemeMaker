@@ -1,0 +1,80 @@
+/*=========================
+    Progress — where the talk is
+===========================
+
+A bar divided into one segment per section of the deck, each segment as wide as
+its section is long, filled up to the current slide. It answers, without the
+audience having to count, the two questions a bare "07 / 30" leaves open: how
+much of *this* part is left, and how many parts come after it.
+
+Built by pkg/script/slide-foot.js, once, at load — one bar per content slide.
+Nothing updates on step change: slide 7's bar only ever has to show slide 7's
+progress, so the component is static CSS and no JS runs during the talk.
+
+    <div class="progress">
+        <div class="progress_seg current" style="--span: 12">
+            <i class="progress_fill" style="--fill: 25%"></i>
+        </div>
+        …one more segment per section…
+    </div>
+
+`--span` is the section's length in slides and feeds flex-grow, so the segments
+are always to scale with the deck. `--fill` is how much of that section is
+behind you: 100% for a section already finished, 0% for one not yet started, a
+fraction on the one you are in — which also carries `.current`.
+
+The element is generic on purpose. It knows nothing about the foot it usually
+sits in; drop it anywhere a `<div class="progress">` fits. */
+
+.progress {
+    /* Knobs. Set them on `.slide_foot` to re-tune the bar for one deck. */
+    --prog-h: 6px;
+    --prog-gap: 5px;
+    --prog-radius: 3px;
+    /* The track has to read as an empty bar, not as slide background: what is
+       still ahead is half of what the component is for. --neutral-03 disappears
+       against a light slide. */
+    --prog-track: var(--neutral-04);
+    --prog-done: var(--primary-07);
+    --prog-now: var(--accent-07);
+
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    gap: var(--prog-gap);
+
+    height: var(--prog-h);
+}
+
+/* flex-basis 0 so the segments divide the bar purely by --span: a section of
+   twelve slides is twelve times the segment of a one-slide interlude, whatever
+   the gaps add up to. */
+.progress_seg {
+    flex: var(--span, 1) 1 0;
+    height: 100%;
+
+    border-radius: var(--prog-radius);
+    background: var(--prog-track);
+    overflow: hidden;
+}
+
+.progress_fill {
+    display: block;
+    width: var(--fill, 0);
+    height: 100%;
+
+    border-radius: inherit;
+    background: var(--prog-done);
+}
+
+/* The section you are in: a little taller than the others and in the accent, so
+   "which part is this" lands before the fill is even read. The bar has a fixed
+   height and centres its children, so the extra grows both ways. */
+
+.progress_seg.current {
+    height: calc(var(--prog-h) + 4px);
+}
+
+.progress_seg.current .progress_fill {
+    background: var(--prog-now);
+}

@@ -1,0 +1,84 @@
+/*=========================
+    Typography
+===========================
+
+Two typefaces, addressed by role and never by name (see theme.css): 'HeavyFont'
+for anything that is meant to be read across a room, 'MyFont' for everything
+else. Swapping either is one line in theme.css and nothing here changes.
+
+Sizes are absolute pixels on purpose. The deck lives inside a fixed 1920×1080
+scene that impress.js scales as a whole, so a px here is a stable fraction of
+the projected image — relative units would only add a layer of indirection over
+a coordinate system that is already virtual. */
+
+/* ── Slide titles ───────────────────────────────────────────────────────── */
+
+/* The small label above a title: says which part of the talk you are in. */
+.eyebrow {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent-07);
+}
+
+.slide_title {
+    font-family: 'HeavyFont';
+    font-size: 60px;
+    line-height: 1.06;
+    letter-spacing: 0.005em;
+    color: var(--neutral-09);
+}
+
+/* One notch down, for slides whose title is a full sentence. */
+.slide_title.small { font-size: 46px; }
+
+/* A deck of statements: the single sentence a slide exists to deliver. */
+.headline {
+    font-family: 'HeavyFont';
+    font-size: 76px;
+    line-height: 1.08;
+    color: var(--neutral-09);
+}
+
+.subhead {
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--primary-07);
+}
+
+.lead {
+    font-size: 33px;
+    font-weight: 300;
+    line-height: 1.4;
+    color: var(--neutral-07);
+}
+
+/* ── Running text ───────────────────────────────────────────────────────── */
+
+.small  { font-size: 24px; line-height: 1.4; }
+.tiny   { font-size: 20px; line-height: 1.35; }
+.dim    { color: var(--neutral-06); }
+
+/* Inline emphasis. `hl` is the one that carries meaning — the word the audience
+   should leave with — so it gets the accent; `key` is structural emphasis. */
+.hl  { color: var(--accent-07); font-weight: 600; }
+.key { color: var(--primary-07); font-weight: 600; }
+strong, b { font-weight: 700; color: var(--neutral-09); }
+
+/* Identifiers, file names, class names: anything quoted from the source. */
+.mono {
+    font-family: 'Courier New', monospace;
+    font-size: 0.88em;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--neutral-02);
+    color: var(--primary-07);
+}
+
+/* A figure quoted in running text — "158 classes", "48 Mo". */
+.num {
+    font-family: 'HeavyFont';
+    font-size: 1.12em;
+    color: var(--accent-07);
+}

@@ -1,0 +1,105 @@
+/*=========================
+    Lists
+===========================
+
+Three list shapes, all built on <ul>/<ol> so the markup stays semantic and the
+substep plugin can reveal <li> elements one at a time (see reveal.css).
+
+    .bullets   the default — a marker drawn with ::before, not list-style,
+               so its colour follows the accent ramp
+    .steps     numbered, for anything ordered: a procedure, a timeline
+    .plain     no marker at all, for lists that are really just short lines
+
+Markers are drawn rather than inherited because `list-style` colour cannot be
+set independently of the text in any reliable way — and the marker is exactly
+the part that should be accent-coloured while the text stays neutral. */
+
+.bullets,
+.steps,
+.plain {
+    --list-gap: 14px;
+    --list-indent: 38px;
+    --list-marker: var(--accent-07);
+
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--list-gap);
+
+    text-align: left;
+    line-height: 1.38;
+}
+
+.bullets > li,
+.steps > li,
+.plain > li {
+    position: relative;
+    padding-left: var(--list-indent);
+}
+
+.plain > li { padding-left: 0; }
+
+/* ── Markers ────────────────────────────────────────────────────────────── */
+
+.bullets > li::before {
+    content: "";
+    position: absolute;
+    left: 6px;
+    top: 0.52em;
+
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    background: var(--list-marker);
+}
+
+.steps {
+    counter-reset: step;
+    --list-indent: 56px;
+}
+
+.steps > li::before {
+    counter-increment: step;
+    content: counter(step);
+
+    position: absolute;
+    left: 0;
+    top: 0.06em;
+
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--list-marker);
+    color: var(--neutral-01);
+
+    font-family: 'HeavyFont';
+    font-size: 21px;
+    line-height: 36px;
+    text-align: center;
+}
+
+/* ── Modifiers ──────────────────────────────────────────────────────────── */
+
+.bullets.tight,
+.steps.tight,
+.plain.tight { --list-gap: 8px; }
+
+.bullets.loose,
+.steps.loose { --list-gap: 24px; }
+
+.bullets.neutral { --list-marker: var(--primary-07); }
+.bullets.ok      { --list-marker: var(--success-07); }
+
+/* Struck through: the options that were examined and set aside. Kept visible on
+   purpose — a jury asks what you rejected as often as what you kept. */
+.bullets.dropped > li {
+    color: var(--neutral-06);
+}
+.bullets.dropped > li::before {
+    background: transparent;
+    border: 3px solid var(--neutral-05);
+    border-radius: 50%;
+}

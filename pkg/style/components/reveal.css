@@ -1,0 +1,78 @@
+/*=========================
+    Reveal
+===========================
+
+basic_elements.css already animates `.box` on step enter / exit. This file
+generalises the same movement to two other cases the deck needs, without
+touching that file:
+
+    .reveal    any element that should fade in when its step becomes active —
+               the `.box` behaviour, available on a card, a figure, a table row
+
+    .substep   the impress.js substep plugin: an element that appears only when
+               the speaker presses Space again, so a slide can be built up in
+               front of the audience instead of landing all at once
+
+The plugin itself only adds classes; making them mean something visually is the
+deck's job — that is what the two rules below are. `substep-visible` is on the
+current substep and every one before it, `substep-active` on the current one
+only, so an already-revealed item can be dimmed back down while the newest one
+holds the eye.
+
+Order of reveal follows document order unless an element carries
+`data-substep-order`. */
+
+/* ── Whole-element reveal, mirroring .box ───────────────────────────────── */
+
+.reveal {
+    opacity: 0;
+    transform: translateY(-40px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.step.active .reveal { opacity: 1; transform: translateY(0); }
+.step.past   .reveal { opacity: 0; transform: translateY(40px); }
+
+/* Stagger: a row of cards should not arrive as one slab. */
+.reveal.d1 { transition-delay: 0.10s; }
+.reveal.d2 { transition-delay: 0.20s; }
+.reveal.d3 { transition-delay: 0.30s; }
+.reveal.d4 { transition-delay: 0.40s; }
+
+/* ── Substeps ───────────────────────────────────────────────────────────── */
+
+.substep {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.substep.substep-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Everything revealed but no longer the point recedes a little. Add `hold` to
+   any substep that must keep full weight after the next one appears — a table
+   the following substeps comment on, for instance. */
+.substep.substep-visible:not(.substep-active):not(.hold) { opacity: 0.55; }
+
+/* A card that is the substep the speaker just landed on carries the accent
+   border for as long as it stays current — not a static `.card.accent` on
+   whichever one happened to be written last, but the one the room is
+   actually looking at right now. Goes back to the plain border the moment a
+   later substep takes over (or `hold` no longer applies, once it recedes). */
+.card.substep.substep-active {
+    --card-border: var(--accent-07);
+    --card-accent: var(--accent-07);
+}
+
+/* `keep` reserves the element's space before it is revealed, so the slide does
+   not reflow as substeps arrive. Use it inside grids and tables; leave it off
+   when the collapse is the effect you want. */
+.substep.keep { visibility: hidden; opacity: 1; transform: none; }
+.substep.keep.substep-visible { visibility: visible; }
+
+/* Table rows cannot be translated reliably across browsers — fade only. */
+tr.substep { transform: none; }
+tr.substep.substep-visible { transform: none; }
